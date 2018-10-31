@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  uwsgi:
+    build:
+      context: .
+    environment:
+      - DJANGO_SETTINGS_MODULE=ecsapp.settings
+    volumes:
+      - ./docker_volumes/static:/app/static
+
+  nginx:
+    build:
+      context: nginx
+    links:
+      - uwsgi
+    volumes_from:
+      - uwsgi
+    volumes:
+      - ./docker_volumes/static:/app/static
+    ports:
+      - 80:80

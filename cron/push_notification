@@ -1,0 +1,1 @@
+00 19 * * * root /usr/bin/python /home/ec2-user/ecsapp/manage.py notify_remind_message --settings=ecsapp.settings

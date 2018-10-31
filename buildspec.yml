@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --no-include-email --region ${AWS_DEFAULT_REGION})
+      - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}
+      - REPOSITORY_URI_NGINX=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME_NGINX}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker-compose build
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker build -t $REPOSITORY_URI_NGINX:latest ./nginx
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:lastest
+      - docker tag $REPOSITORY_URI_NGINX:latest $REPOSITORY_URI_NGINX:lastest
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI_NGINX:latest
+      - echo Writing image definitions file...
+      - echo "[{\"name\":\"${IMAGE_NAME}\",\"imageUri\":\"${REPOSITORY_URI}:latest\"},{\"name\":\"${IMAGE_NAME_NGINX}\",\"imageUri\":\"${REPOSITORY_URI_NGINX}:latest\"}]" > imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json

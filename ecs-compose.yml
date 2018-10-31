@@ -1,0 +1,22 @@
+version: "2"
+ 
+services:
+  uwsgi:
+    image: 012912648462.dkr.ecr.ap-northeast-1.amazonaws.com/nic-gym-server_uwsgi
+    environment:
+      - DJANGO_SETTINGS_MODULE=lms.settings
+    volumes:
+      - /docker_volumes/static:/app/static
+    mem_limit: 268435456
+
+  nginx:
+    image: 012912648462.dkr.ecr.ap-northeast-1.amazonaws.com/nic-gym-server_app
+    links:
+      - uwsgi
+    volumes_from:
+      - uwsgi
+    ports:
+      - 80:80
+    volumes:
+      - /app/static:/static
+    mem_limit: 134217728
